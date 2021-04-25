@@ -1,0 +1,165 @@
+
+
+@using UnitedSales.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+
+@inject ApplicationDbContext _repository
+
+@{
+    ViewData["Title"] = "Wallet";
+    ViewData["ActivePage"] = "GWallet";    
+}
+
+<div class="content-wrapper">
+    @if(!ViewBag.IsAdmin)
+    {
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12 col-xl-3 ">
+                <div class="col-md-4 col-xl-3 ">
+                    <div class="card bg-c-blue order-card">
+                        <div class="card-block">
+                            <h6 class="m-b-20" style="font-size: 17px;font-weight: bold;"> Myron Grab Wallet
+                            </h6>
+                            <h2 class="text-right"><i class="fa fa-inr f-left"></i><span>@ViewBag.Wallet</span></h2>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+    }
+    <!--Only For Admin Section-->
+    @if(ViewBag.IsAdmin)
+    {
+        <section class="content">
+            <div class="row">
+                <!-- Form controls -->
+                <div class="col-sm-12">
+                    <div class="panel panel-bd ">
+                        <div class="panel-heading">
+                            <div class="btn-group" id="buttonlist">
+                                View All Reports
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <form class="col-sm-12" style="margin-left: -30px;">
+                                <div class="form-group col-md-4">
+                                    <label>Select User</label>
+                                    @Html.DropDownList("LeadId", null, "--Select State--", htmlAttributes: new { @class = "form-control" })
+                                </div>
+
+                                <div class="reset-button col-sm-12 ">
+                                    <a href="javascript:;" onclick="btnGetReport();" class="btn btn-success w-md m-b-5">Submit</a>
+                                    <a href="/Home" class="btn btn-primary w-md m-b-5">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="table-responsive">
+                                <table id="dataTableExample1" class="table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr class="info">
+                                            <th>User</th>
+                                            <th>Count</th>
+                                            <th>Total Incentives</th>                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var summary = (WalletSummary)ViewData["Summary"] ?? null;
+                                        }
+                                        <tr>
+                                            <td>@summary?.EmpCodeName</td>
+                                            <td>@summary?.ClosedCount</td>
+                                            <td>@summary?.TotalIncentives</td>                                            
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />  
+    <script>
+        $(document).ready(function(){
+            var id = getUrlParameter("lid");
+            $('#LeadId').val(id);
+        });
+
+        function btnGetReport()
+        {
+            var lid = $('#LeadId').val();
+            
+            if(lid == "" || lid == null)
+            {
+                alert("select lead and try again.");
+                return false;
+            }
+
+            window.location = "/Dialling/Wallet?lid=" + lid;
+        }
+    </script>  
+    <style>
+        .order-card {
+            color: #fff;
+        }
+
+        .bg-c-blue {
+            background: linear-gradient(45deg, #00b09b, #96c93d) !important;
+        }
+
+        .bg-c-green {
+            background: linear-gradient(45deg, #2ed8b6, #59e0c5);
+        }
+
+        .bg-c-yellow {
+            background: linear-gradient(45deg, #6a11cb, #2575fc) !important;
+        }
+
+        .bg-c-pink {
+            background: linear-gradient(45deg, #ee0979, #ff6a00) !important;
+        }
+
+
+        .card {
+            border-radius: 5px;
+            -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+            box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+            border: none;
+            margin-bottom: 30px;
+            -webkit-transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .card .card-block {
+            padding: 22px;
+        }
+
+        .order-card i {
+            font-size: 26px;
+        }
+
+        .f-left {
+            float: left;
+        }
+
+        .f-right {
+            float: right;
+        }
+    </style>
+}

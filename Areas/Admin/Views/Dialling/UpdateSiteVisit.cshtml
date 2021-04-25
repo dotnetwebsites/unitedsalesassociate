@@ -1,0 +1,57 @@
+@model TeleCalling
+
+@using UnitedSales.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+
+@inject ApplicationDbContext _repository
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> _userManager
+
+
+@{
+    ViewData["Title"] = "Tele Calling Sheet";
+    ViewData["ActivePage"] = "Dialling";
+    var user = await _userManager.GetUserAsync(User);
+    var isadmin = await _userManager.IsInRoleAsync(user,"admin");
+
+    int enqid = Convert.ToInt32(Context.Request.Query["enqid"]);
+    var enquiry = await _repository.Enquiries.FindAsync(enqid);
+}
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="row">        
+            <div class="col-sm-12">
+                <div class="panel panel-bd ">
+                    <div class="panel-heading">
+                        <div class="btn-group" id="buttonlist">
+                            Site Visit                                                       
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <form method="POST" class="col-sm-12">
+                            <div asp-validation-summary="All" class="text-danger"></div>
+                            <input asp-for="Id" type="hidden"/>
+                            
+                            <div class="col-sm-6 form-group">
+                                <label>Status</label>
+                                <select asp-for="Status" class="form-control">
+                                    <option value="Account">Site Visit Completed</option>
+                                </select>
+                            </div>
+                          
+                            <div class="reset-button col-sm-12">                        
+                                <button type="submit" class="btn btn-success w-md m-b-5">Submit</button>
+                                <a asp-action="ListOfSiteVisit" class="btn btn-primary w-md m-b-5">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />    
+}

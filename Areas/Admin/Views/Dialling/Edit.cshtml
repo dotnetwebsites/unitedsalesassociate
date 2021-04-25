@@ -1,0 +1,274 @@
+@model TeleCallingView
+
+@using UnitedSales.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+
+@inject ApplicationDbContext _repository
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> _userManager
+
+
+@{
+    ViewData["Title"] = "Tele Calling Sheet";
+    ViewData["ActivePage"] = "Dialling";
+    var user = await _userManager.GetUserAsync(User);
+    var isadmin = await _userManager.IsInRoleAsync(user,"admin");
+
+    int enqid = Convert.ToInt32(Context.Request.Query["enqid"]);
+    var enquiry = await _repository.Enquiries.FindAsync(enqid);    
+}
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="row">        
+            <!-- Modal -->
+            <div id="myModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Send a message to Customer</h4>
+                    </div>
+                    <div class="modal-body">                        
+                        <h3>Mobile No: @enquiry.PhoneNumber</h3>
+                        <select id="ddlProjectId" asp-items="@ViewBag.ProjectId" class="form-control">
+                            <option value="-1">--Select Project--</option>
+                        </select>
+                        @{
+                            //int cnts = 1;
+                            //var smss = await _repository.SendSMS.Where(p => p.IsActive && p.ProjectId == 4).ToListAsync();
+                        }
+
+                        @* @foreach (var msg in smss)
+                        {
+                            <input type="radio" id="IsActive_@cnts" name="Message" value="@msg.Id"/> <label for="IsActive_@cnts">@msg.Message</label>
+                            <br>
+                            cnts++;
+                        }*@
+                        <div id="cntMessage"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="btnSendMessage();" class="btn btn-success">Send a Message</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Form controls -->
+            <div class="col-sm-12">
+                <div class="panel panel-bd ">
+                    <div class="panel-heading">
+                        <div class="btn-group" id="buttonlist">
+                            Tele Calling Sheet                                                        
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <form method="POST" class="col-sm-12">
+                            <div asp-validation-summary="All" class="text-danger"></div>
+                            
+                            <div class="col-sm-12 form-group">
+                                <label>Enquiry No : <span class="text-danger">@enquiry.Id</span></label>
+                            </div>
+
+                            <div class="col-sm-4 form-group">
+                                <label>Mobile No</label>
+                                <input id="txtMobile" value="@enquiry.PhoneNumber" disabled class="form-control"/>
+                            </div>
+                            
+                            <div class="col-sm-4 form-group">
+                                <label>First Name</label>
+                                <input asp-for="FirstName" class="form-control"/>
+                            </div>
+
+                           <div class="col-sm-4 form-group">
+                                <label>Last Name</label>
+                                <input asp-for="LastName" class="form-control"/>
+                            </div>
+
+                           <div class="col-sm-4 form-group">
+                                <label>Alternte No / Whatsapp No</label>
+                                <input asp-for="AlternateNo" class="form-control"/>
+                            </div>
+
+                            <div class="col-sm-4 form-group">
+                                <label>Email</label>
+                                <input asp-for="Email" class="form-control"/>
+                            </div>
+
+                            <div class="col-sm-4 form-group">
+                                <label>Zone</label>
+                                <input asp-for="SpouseName" class="form-control"/>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                @Html.LabelFor(model => model.StateId)
+                                @Html.DropDownList("StateId", null, "--Select State--", htmlAttributes: new { @class = "form-control" })
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                @Html.LabelFor(model => model.CityId)
+                                <select asp-for="CityId" asp-items="@ViewBag.CityId" class="form-control">
+                                    <option value="-1">--Select City--</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label>Project Location</label>
+                                @Html.DropDownList("LocationId", null, "--Select Project Location--", htmlAttributes: new { @class = "form-control" })                                
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label>Project</label>
+                                @Html.DropDownList("ProjectId", null, "--Select Project--", htmlAttributes: new { @class = "form-control" })                                
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                @Html.LabelFor(model => model.ExtentId)
+                                <select asp-for="ExtentId" asp-items="@ViewBag.ExtentId" class="form-control">
+                                    <option value="-1">--Select Extent--</option>
+                                </select>                        
+                            </div>
+
+                            @* <div class="col-sm-6 form-group">
+                                <label>Project Extent</label>
+                                @Html.DropDownList("ExtentId", null, "--Select Project Extent--", htmlAttributes: new { @class = "form-control" })                                
+                            </div> *@
+
+                            <div class="form-group col-md-4">
+                                <label>Status</label>
+                                <select asp-for="Status" class="form-control">
+                                    <option value="">Status</option>
+                                    <option value="FOLLOWUP">Follow Up</option>
+                                    <option value="CRM">Site Visit</option>
+                                    @* <option value="CLOSED">Closed</option> *@
+                                    <option value="NOTINTREST">Not Intrested</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label>Follow up date</label>
+                                <input asp-for="FollowUpDate" class="form-control"/>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label>Comment</label>
+                                <textarea asp-for="Remark" class="form-control" rows="2" cols="7"></textarea>
+                            </div>
+                          
+                            <div class="reset-button col-sm-12">                        
+                                <button type="submit" class="btn btn-success w-md m-b-5">Submit</button>
+                                <button type="button" data-toggle="modal" data-target="#myModal" class="btn btn-warning w-md m-b-5">Send Message</button>
+                                <a asp-action="Index" class="btn btn-primary w-md m-b-5">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function(){
+                $("#ProjectId").change(function(){
+                $("#ExtentId").empty();
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("LoadExtent")',
+                    dataType:'json',
+                    data:{id: $("#ProjectId").val() },
+                    success: function(data){
+                        $("#ExtentId").append('<option value="-1">--Select Extent--</option>');
+
+                        $.each(data, function(i, d){
+                            $("#ExtentId").append('<option value="' + d.value +'">' + d.text + '</option>');
+                        });
+                    },
+                    error: function(ex){
+                        console.log(ex);
+                    }
+                });
+            }); 
+
+        });
+        
+        $("#ddlProjectId").change(function() {
+            var projid = $("#ddlProjectId").val();
+
+            if(projid == null || projid == "")
+            {
+                alert('Please select project first and try again.');
+                return false;
+            }
+
+            $.ajax({
+                url: '/Dialling/GetMessages',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: {"projectId": projid},
+                type: 'GET',
+                success: function(data, textStatus, jqXHR){
+                    $("#cntMessage").text('');
+
+                    for(i=0; i < data.length; i++)
+                    {                       
+                        var btns = '<input type="radio" id="IsActive_'+ data[i]["id"] +'" name="Message" value="' + data[i]["id"] + '"/> <label for="IsActive_'+ data[i]["id"] +'">' + data[i]["message"] + '</label><br>';
+                        $("#cntMessage").append(btns);
+                    }
+
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(error);
+                }
+            }); 
+        });
+
+        function btnSendMessage()
+        {
+            var mobile = $("#txtMobile").val();
+            var message = $('input[name="Message"]:checked').val();;
+            
+            $.ajax({
+                url: '/Dialling/SendMessage',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: {"mob": mobile, "msg": message},
+                type: 'GET',
+                success: function(data, textStatus, jqXHR){
+                    console.log(data);
+                    alert(data);                    
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                    alert(error);
+                }
+            });            
+        }
+
+        $("#StateId").change(function(){
+                $("#CityId").empty();
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("LoadCities")',
+                    dataType:'json',
+                    data:{id: $("#StateId").val() },
+                    success: function(data){
+                        $("#CityId").append('<option value="-1">--Select City--</option>');
+
+                        $.each(data, function(i, d){
+                            $("#CityId").append('<option value="' + d.value +'">' + d.text + '</option>');
+                        });
+                    },
+                    error: function(ex){
+                        console.log(ex);
+                    }
+                });
+            });
+    </script>
+}

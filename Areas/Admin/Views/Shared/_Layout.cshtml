@@ -1,0 +1,313 @@
+@using UnitedSales.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> _userManager
+
+@{
+    var user = await _userManager.GetUserAsync(User);
+    var isAdmin = !SignInManager.IsSignedIn(User) ? false : await _userManager.IsInRoleAsync(user, "admin");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>@ViewData["Title"] - United Sales Associate</title>
+   <link rel="shortcut icon" href="~/assets/admin_assets/dist/img/favicon.png" type="image/x-icon">
+   <link href="~/assets/admin_assets/plugins/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+   <link href="~/assets/admin_assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+   <link href="~/assets/admin_assets/plugins/lobipanel/lobipanel.min.css" rel="stylesheet" type="text/css" />
+   <link href="~/assets/admin_assets/plugins/pace/flash.css" rel="stylesheet" type="text/css" />
+   <link href="~/assets/admin_assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+   <link href="~/assets/admin_assets/pe-icon-7-stroke/css/pe-icon-7-stroke.css" rel="stylesheet" type="text/css" />
+   <link href="~/assets/admin_assets/themify-icons/themify-icons.css" rel="stylesheet" type="text/css" />
+   <link href="~/assets/admin_assets/dist/css/stylecrm.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="hold-transition sidebar-mini">
+   <div class="wrapper">
+      <header class="main-header">
+         <a asp-area="" asp-controller="Home" asp-action="Index" class="logo">
+            <span class="logo-mini">
+               <img src="~/assets/admin_assets/dist/img/favicon.png" alt="">
+            </span>
+            <span class="logo-lg">
+               <img src="~/assets/admin_assets/dist/img/usalogo.png" alt="">
+            </span>
+         </a>
+         <nav class="navbar navbar-static-top">
+            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+               <span class="sr-only">Toggle navigation</span>
+               <span class="pe-7s-angle-left-circle"></span>
+            </a>
+            <div class="navbar-custom-menu">
+               <ul class="nav navbar-nav">
+                  <li class="dropdown dropdown-user">
+                     <a asp-action="Index" asp-controller="Home" class="dropdown-toggle" data-toggle="dropdown">
+                           @if (user?.ProfileImage != null)
+                           {
+                              <img src="~/profileimages/@user.ProfileImage" class="img-circle" width="45" height="45"
+                                    alt="user">
+                           }
+                           else
+                           {
+                              <img src="~/assets/dist/img/avatar5.png" class="img-circle" width="45" height="45"
+                                    alt="user">
+                           }
+                           @* <img src="/assets/dist/img/avatar5.png" class="img-circle" width="45" height="45"
+                              alt="user"> *@
+                        </a>
+                        <ul class="dropdown-menu">
+                           <li>
+                              <a href="javascript:;">
+                                    <i class="fa fa-user"></i> @user?.FullName</a>
+                           </li>
+                           <li>
+                              <a href="javascript:;">
+                                    <i class="fa fa-user"></i> USER: @user?.UserName.ToUpper()</a>
+                           </li>
+                           <li><a href="/Identity/Account/Manage/ChangePassword">
+                                    <i class="fa fa-lock"></i> Change Password</a>
+                           </li>
+                           <li>
+                              <a href="javascript:;">
+                                    <form asp-area="Identity" asp-page="/Account/Logout"
+                                       asp-route-returnUrl="/Identity/Account/Login">
+                                       <i class="fa fa-sign-out"></i><input type="submit" class="btn btn-link"
+                                          value="Sign out">
+                                    </form>
+                              </a>
+                              @* <a href="login.html">
+                                    <i class="fa fa-sign-out"></i> Sign out
+                                    </a> *@
+                           </li>
+                        </ul>
+                  </li>
+               </ul>
+            </div>
+         </nav>
+      </header>
+      <aside class="main-sidebar">
+         <div class="sidebar">
+            <ul class="sidebar-menu">
+                    <li id="Dashboard">
+                        <a asp-area="Admin" asp-action="Index" asp-controller="Home"><i class="fa fa-user"></i><span>Dashboard</span>
+                            <span class="pull-right-container"></span>
+                        </a>
+                    </li>
+                    
+                    <li id="ManageProfile">
+                        <a asp-area="Admin" asp-action="Edit" asp-controller="Home"><i class="fa fa-user"></i><span>Personal
+                                Information</span>
+                            <span class="pull-right-container"></span>
+                        </a>
+                    </li>
+                    @if(SignInManager.IsSignedIn(User)){                        
+                        if (!(await _userManager.IsInRoleAsync(user, "Telecaller") || 
+                                await _userManager.IsInRoleAsync(user, "Account") ||
+                                await _userManager.IsInRoleAsync(user, "CRM") ))
+                        {
+                            <li id="NewEnquiry">
+                                <a asp-area="Admin" asp-action="Index" asp-controller="Enquiry"><i
+                                        class="fa fa-user"></i><span>Enquiry Form</span>
+                                    <span class="pull-right-container"></span>
+                                </a>
+                            </li>
+                        }
+                    }
+                    <li id="PersonalProfile">
+                        <a asp-area="Admin" asp-action="PersonalProfile" asp-controller="Home"><i
+                                class="fa fa-user-circle-o"></i><span>Personal Profile</span>
+                            <span class="pull-right-container"></span>
+                        </a>
+                    </li>
+
+                    @if (SignInManager.IsSignedIn(User) && await _userManager.IsInRoleAsync(user, "admin"))
+                    {
+                        <li id="CreateUser">
+                            <a asp-area="Identity" asp-action="Register" asp-controller="Account"><i
+                                    class="fa fa-user-circle-o"></i><span>Create User</span>
+                                <span class="pull-right-container"></span>
+                            </a>
+                        </li>
+
+                        <li id="ManageUser">
+                            <a asp-area="Admin" asp-action="ManageEmployee" asp-controller="Home"><i
+                                    class="fa fa-user-circle-o"></i><span>Manage Users</span>
+                                <span class="pull-right-container"></span>
+                            </a>
+                        </li>
+
+                        <li id="ManageRoles">
+                            <a asp-area="Admin" asp-action="Index" asp-controller="RoleManager"><i
+                                    class="fa fa-user-circle-o"></i><span>Role Manager</span>
+                                <span class="pull-right-container"></span>
+                            </a>
+                        </li>
+                    }
+
+                    @if (SignInManager.IsSignedIn(User) && (await _userManager.IsInRoleAsync(user, "Telecaller")
+                    || await _userManager.IsInRoleAsync(user, "admin")))
+                    {
+                        <li id="Dialling">
+                            <a asp-area="Admin" asp-action="Index" asp-controller="Dialling">
+                                <i class="fa fa-file-excel-o"></i><span>Dailing Sheet</span>
+                                <span class="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
+                    }                    
+                    <li id="LSReports" class="treeview">
+                        <a href="#">
+                            <i class="fa fa-dashboard"></i><span>Lead Status Dashboard</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            @if (SignInManager.IsSignedIn(User) && !(await _userManager.IsInRoleAsync(user, "Account") || await _userManager.IsInRoleAsync(user, "CRM")))
+                            {
+                            <li><a asp-area="Admin" asp-controller="Dialling" asp-action="ListOfFollowUps">Follow-ups</a></li>
+                            <li><a asp-area="Admin" asp-controller="Dialling" asp-action="ListOfNotInterested">Not intrested</a></li>
+                            }
+                            <li><a asp-area="Admin" asp-controller="Dialling" asp-action="ListOfSiteVisit">Pending for Site Visit</a></li>
+                            <li><a asp-area="Admin" asp-controller="Dialling" asp-action="ListOfAccounts">Completed Site Visit</a></li>
+
+                            @if (SignInManager.IsSignedIn(User) && !(await _userManager.IsInRoleAsync(user, "CRM")))
+                            {
+                            <li><a asp-area="Admin" asp-controller="Dialling" asp-action="ListOfClosures">Closures (Sales)</a></li>
+                            }
+                        </ul>
+                    </li>
+                    @if (SignInManager.IsSignedIn(User) && !(await _userManager.IsInRoleAsync(user, "Account") ||
+                            await _userManager.IsInRoleAsync(user, "CRM") ))
+                    {
+                    <li id="GWallet" class="treeview">
+                        <a href="#">
+                            <i class="fa fa-money"></i><span>MyRon Grab Wallet</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a asp-area="Admin" asp-controller="Dialling" asp-action="ListOfClosures">List of Closures (Sales)</a></li>
+                            <li>
+                                <a asp-area="Admin" asp-controller="Dialling" asp-action="Wallet">Grab Wallet</a>
+                            </li>
+                        </ul>
+                    </li>
+                    }
+                    <li id="EBrochures">
+                        <a asp-area="Admin" asp-controller="Home" asp-action="Ebrochures">
+                            <i class="fa fa-file-pdf-o"></i><span>e - Brochures</span>
+                            <span class="pull-right-container">
+                            </span>
+                        </a>
+                    </li>
+
+                    @if (SignInManager.IsSignedIn(User) && await _userManager.IsInRoleAsync(user, "admin"))
+                    {
+                        <li id="LeadsAlloc">
+                            <a asp-area="Admin" asp-action="Index" asp-controller="LeadsAllocation">
+                                <i class="fa fa-file-excel-o"></i><span>Leads Allocation</span>
+                                <span class="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
+                        
+                        <li id="Location">
+                            <a asp-area="Admin" asp-controller="Location" asp-action="Index">
+                                <i class="fa fa-file-pdf-o"></i><span>Location</span>
+                                <span class="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
+
+                        <li id="Project">
+                            <a asp-area="Admin" asp-controller="Project" asp-action="Index">
+                                <i class="fa fa-file-pdf-o"></i><span>Project / Incentives</span>
+                                <span class="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
+
+                        <li id="ProjectExtent">
+                            <a asp-area="Admin" asp-controller="ProjectExtent" asp-action="Index">
+                                <i class="fa fa-file-pdf-o"></i><span>Project Extents</span>
+                                <span class="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
+
+                        <li id="SMSMaster">
+                            <a asp-area="Admin" asp-controller="SMSMaster" asp-action="Index">
+                                <i class="fa fa-file-pdf-o"></i><span>SMS Master</span>
+                                <span class="pull-right-container">
+                                </span>
+                            </a>
+                        </li>
+                    }
+
+                </ul>
+         </div>
+         <!-- /.sidebar -->
+      </aside>
+
+      @RenderBody()
+      <!-- /.content-wrapper -->
+      <footer class="main-footer">
+         <strong>Copyright &copy; 2021 <a href="#">United Sales Associate</a>.</strong> All rights reserved.
+      </footer>
+   </div>
+   <script src="~/assets/admin_assets/plugins/jQuery/jquery-1.12.4.min.js" type="text/javascript"></script>
+   <script src="~/assets/admin_assets/plugins/jquery-ui-1.12.1/jquery-ui.min.js" type="text/javascript"></script>
+   <script src="~/assets/admin_assets/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+   <script src="~/assets/admin_assets/plugins/lobipanel/lobipanel.min.js" type="text/javascript"></script>
+   <script src="~/assets/admin_assets/plugins/pace/pace.min.js" type="text/javascript"></script>
+   <script src="~/assets/admin_assets/plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+   <script src="~/assets/admin_assets/plugins/fastclick/fastclick.min.js" type="text/javascript"></script>
+   <script src="~/assets/admin_assets/dist/js/custom.js" type="text/javascript"></script>
+   <script src="~/assets/admin_assets/dist/js/dashboard.js" type="text/javascript"></script>
+
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/dataTables.semanticui.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js" type="text/javascript"></script>
+
+   <script>
+      $(document).ready(function () {
+         $('.example').DataTable();
+
+         $('#@ViewData["ActivePage"]?.ToString()').addClass("active");
+      });
+
+      function DeleteConfirm()
+        {
+            if(confirm('Are you sure want to delete this record'))
+                return true;
+            else 
+                return false;
+        }
+
+        var getUrlParameter = function getUrlParameter(sParam) {
+            var sPageURL = window.location.search.substring(1),
+                sURLVariables = sPageURL.split('&'),
+                sParameterName,
+                i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+                }
+            }
+        };
+   </script>
+   @RenderSection("Scripts", required: false)
+</body>
+
+</html>

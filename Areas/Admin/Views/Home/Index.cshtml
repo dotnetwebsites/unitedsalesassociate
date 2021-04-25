@@ -1,0 +1,161 @@
+@using UnitedSales.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+
+@inject ApplicationDbContext _repository
+@inject UserManager<ApplicationUser> _userManager
+    
+@{
+    ViewData["Title"] = "Welcome";
+    ViewData["ActivePage"] = "Dashboard";
+    var user = await _userManager.GetUserAsync(User);
+    
+}
+<div class="content-wrapper">
+    <section class="content">
+        <div class="row">
+            @if (!(await _userManager.IsInRoleAsync(user, "CRM") || await _userManager.IsInRoleAsync(user, "account")))
+            {
+            
+            <div class="col-md-3 col-xl-3">
+                <a asp-area="Admin" asp-action="Index" asp-controller="Dialling">
+                <div class="card bg-c-pink order-card"
+                    style="background: linear-gradient(45deg, #f93a5a, #f7778c) !important">
+                    <div class="card-block">
+                        <h6 class="m-b-20" style="font-size: 17px;"> Open Leads</h6>
+                        <h2 class="text-right"><i class="fa fa-optin-monster f-left"></i><span>
+                            @ViewBag?.OpenLeads
+                        </span>
+                        </h2>
+                    </div>
+                </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-xl-3">
+                <a asp-area="Admin" asp-action="ListOfFollowUps" asp-controller="Dialling">
+                <div class="card bg-c-yellow order-card">
+                    <div class="card-block">
+                        <h6 class="m-b-20" style="font-size: 17px;"> Follow Ups</h6>
+                        <h2 class="text-right"><i class="fa fa-user-plus f-left"></i><span>
+                            @ViewBag.FllowUp
+                        </span></h2>
+                    </div>
+                </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-xl-3">
+                <a asp-area="Admin" asp-action="ListOfNotInterested" asp-controller="Dialling">
+                <div class="card bg-c-pink order-card">
+                    <div class="card-block">
+                        <h6 class="m-b-20" style="font-size: 17px;"> Not Intrested</h6>
+                        <h2 class="text-right"><i class="fa fa-eyedropper f-left"></i><span>
+                            @ViewBag.NotInterest
+                        </span></h2>
+                    </div>
+                </div>
+                </a>
+            </div>
+            }
+
+            <div class="col-md-3 col-xl-3">
+                <a asp-area="Admin" asp-action="ListOfSiteVisit" asp-controller="Dialling">
+                <div class="card bg-c-yellow order-card">
+                    <div class="card-block">
+                        <h6 class="m-b-20" style="font-size: 17px;">Pending Site Visits</h6>
+                        <h2 class="text-right"><i class="fa fa-user-plus f-left"></i><span>
+                            @ViewBag.PendingSV
+                        </span></h2>
+                    </div>
+                </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 col-xl-3 ">
+                <a asp-area="Admin" asp-action="ListOfAccounts" asp-controller="Dialling">
+                <div class="card bg-c-blue order-card">
+                    <div class="card-block">
+                        <h6 class="m-b-20" style="font-size: 17px;">Completed Site Visits</h6>
+                        <h2 class="text-right"><i class="fa fa-bandcamp f-left"></i><span>
+                            @ViewBag.CompleteSV
+                        </span></h2>
+                    </div>
+                </div>
+                </a>
+            </div>
+
+            @if (!(await _userManager.IsInRoleAsync(user, "CRM")))
+            {
+            <div class="col-md-3 col-xl-3 ">
+                <a asp-area="Admin" asp-action="ListOfClosures" asp-controller="Dialling">
+                <div class="card bg-c-blue order-card">
+                    <div class="card-block">
+                        <h6 class="m-b-20" style="font-size: 17px;"> Closures (Sales)</h6>
+                        <h2 class="text-right"><i class="fa fa-bandcamp f-left"></i><span>
+                            @ViewBag.Closed
+                        </span></h2>
+                    </div>
+                </div>
+                </a>
+            </div>
+            }
+
+
+            
+        </div>
+
+    </section>    
+</div>
+
+@section Scripts
+{
+    <style>
+    .order-card {
+        color: #fff;
+    }
+
+    .bg-c-blue {
+        background: linear-gradient(45deg, #00b09b, #96c93d) !important;
+    }
+
+    .bg-c-green {
+        background: linear-gradient(45deg, #2ed8b6, #59e0c5);
+    }
+
+    .bg-c-yellow {
+        background: linear-gradient(45deg, #6a11cb, #2575fc) !important;
+    }
+
+    .bg-c-pink {
+        background: linear-gradient(45deg, #ee0979, #ff6a00) !important;
+    }
+
+
+    .card {
+        border-radius: 5px;
+        -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+        box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+        border: none;
+        margin-bottom: 30px;
+        -webkit-transition: all 0.3s ease-in-out;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .card .card-block {
+        padding: 22px;
+    }
+
+    .order-card i {
+        font-size: 26px;
+    }
+
+    .f-left {
+        float: left;
+    }
+
+    .f-right {
+        float: right;
+    }
+</style>
+}

@@ -1,0 +1,110 @@
+@using UnitedSales.Areas.Identity.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+
+@inject ApplicationDbContext _repository
+@inject UserManager<ApplicationUser> _userManager
+
+@{
+    ViewData["Title"] = "List of Not Interested";
+    ViewData["ActivePage"] = "LSReports";
+    List<Enquiry> enquiries = new List<Enquiry>();
+
+    var user = await _userManager.GetUserAsync(User);
+    var isAdmin = await _userManager.IsInRoleAsync(user, "admin");
+
+    if (isAdmin)
+    {
+        enquiries = await _repository.Enquiries.ToListAsync();
+    }
+    else if (await _userManager.IsInRoleAsync(user, "ambassador") ||
+                     await _userManager.IsInRoleAsync(user, "CHBA") ||
+                     await _userManager.IsInRoleAsync(user, "ChannelHead"))
+    {
+        enquiries = await _repository.Enquiries.Where(p => p.EmpCode == user.EmployeeCode).ToListAsync();        
+    }
+    else if (await _userManager.IsInRoleAsync(user, "Telecaller"))
+    {
+        enquiries = await _repository.Enquiries.Where(p => p.LeadAllocTo == user.Id).ToListAsync();
+    }
+}
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="row">
+            <!-- Form controls -->
+            <div class="col-sm-12">
+                <div class="panel panel-bd ">
+                    <div class="panel-heading">
+                        <div class="btn-group" id="buttonlist">
+                            List of Not Interested
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-sm-12">
+                            <table class="ui celled table example">
+                                <thead>
+                                    <tr class="info">
+                                        <th>App ID</th>
+                                        <th>BA ID</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Email</th>
+                                        <th>Project Details</th>   
+                                        <th></th>                                     
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var enquiry in enquiries)
+                                    {
+                                        var calling = _repository.TeleCallings.FirstOrDefault(p=>p.EnquiryId == enquiry.Id && p.Status == "NOTINTREST");
+                                        var loc = await _repository.Locations.FindAsync(calling?.LocationId);
+                                        var proj = await _repository.Projects.FindAsync(calling?.ProjectId);
+                                        var ext = await _repository.ProjectExtents.FindAsync(calling?.ExtentId);
+                                        
+                                        var status = calling?.Status == "NOTINTREST" ? "Not Intrested" : "";
+
+                                        if(calling?.EnquiryId != enquiry.Id)
+                                            continue;
+
+                                        <tr>
+                                            <td>@enquiry.Id</td>
+                                            <td>@enquiry.EmpCode</td>
+                                            <td>@enquiry.FullName</td>
+                                            <td>@enquiry.PhoneNumber</td>
+                                            <td>@enquiry.Email</td>
+                                            
+                                            <td>
+                                                @if(calling != null)
+                                                {
+                                                    <strong>@proj?.ProjectName</strong><br>
+                                                    @ext?.ExtentValue <br>
+                                                    @loc?.LocationName <br>
+                                                    @status<br>
+                                                }
+                                                
+                                            </td>
+                                            <td>
+                                                <a asp-area="" asp-action="Edit" 
+                                                asp-route-id="@calling?.Id" asp-route-enqid="@enquiry.Id" class="btn btn-warning" title="Update">
+                                                    <i class="fa fa-pencil"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />       
+}
